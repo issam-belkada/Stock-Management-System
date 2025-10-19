@@ -25,6 +25,10 @@ class PermissionSeeder extends Seeder
 
     // Notifications
     'view_notifications', 'manage_notifications',
+
+    
+    'view_dashboard',
+
 ];
 
 
