@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,8 @@ use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\PermissionController;
 
 
 Route::post('login', [AuthController::class, 'login']);
@@ -20,17 +23,25 @@ Route::post('login', [AuthController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('user', [AuthController::class, 'user']);
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::put('profile', [ProfileController::class, 'update']);
 
-    // ✅ Protect with permissions
-    Route::post('users/create', [UserController::class, 'store'])
-        ->middleware('permission:create_user');
 
+    // Users
+    Route::get('users', [UserController::class, 'index'])
+        ->middleware('permission:view_users');
+    Route::get('users/{id}', [UserController::class, 'show'])
+        ->middleware('permission:view_users');
+    Route::post('users', [UserController::class, 'store'])
+        ->middleware('permission:manage_users');
+    Route::put('users/{id}', [UserController::class, 'update'])
+        ->middleware('permission:manage_users');
     Route::delete('users/{id}', [UserController::class, 'destroy'])
-        ->middleware('permission:delete_user');
+        ->middleware('permission:manage_users');
 
 
 
-    // 📦 Product Routes
+
+    // Product Routes
     Route::get('/products', [ProductController::class, 'index'])
         ->middleware('permission:view_products');
 
@@ -48,14 +59,27 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 
-    // ✅ Categories & Suppliers
-    Route::apiResource('categories', CategoryController::class)
+    // Categories & Suppliers
+
+    Route::get('categories', [CategoryController::class, 'index'])
         ->middleware('permission:view_categories');
 
-    Route::apiResource('suppliers', SupplierController::class)
-        ->middleware('permission:view_suppliers');
+    Route::get('categories/{id}', [CategoryController::class, 'show'])
+        ->middleware('permission:view_categories');
+    
+    Route::post('categories', [CategoryController::class, 'store'])
+        ->middleware('permission:manage_categories');
+    
+    Route::put('categories/{id}', [CategoryController::class, 'update'])
+        ->middleware('permission:manage_categories');
+    
+    Route::delete('categories/{id}', [CategoryController::class, 'destroy'])
+    ->middleware('permission:manage_categories');
 
-    // ✅ Stock Movement
+    Route::apiResource('suppliers', SupplierController::class)
+        ->middleware('permission:manage_suppliers');
+
+    // Stock Movement
     Route::post('stock-in', [StockMovementController::class, 'stockIn'])
         ->middleware('permission:manage_stock');
 
@@ -63,7 +87,7 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('permission:manage_stock');
 
 
-    // ✅ Notifications
+    // Notifications
     Route::get('notifications', [NotificationController::class, 'index'])
         ->middleware('permission:view_notifications');
 
@@ -76,12 +100,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('notifications/{id}', [NotificationController::class, 'destroy'])
         ->middleware('permission:manage_notifications');
 
-    // ✅ Role Management
+    // Role Management
     Route::apiResource('roles', RoleController::class)
         ->middleware('permission:manage_roles');
 
+    // Permission Management
+    Route::apiResource('permissions', PermissionController::class)
+    ->middleware('permission:manage_permissions');
 
-    // 📊 Dashboard
+    // Dashboard
     Route::get('dashboard', [DashboardController::class, 'index'])->middleware('permission:view_dashboard');
+
+
+    // Reports
+    Route::get('reports/stock', [ReportController::class, 'stockReport'])->middleware('permission:view_reports');
+    Route::get('reports/top-products', [ReportController::class, 'topProducts'])->middleware('permission:view_reports');
+    Route::get('reports/export', [ReportController::class, 'exportCSV'])->middleware('permission:export_reports');
 
 });

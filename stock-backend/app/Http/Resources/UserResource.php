@@ -12,11 +12,11 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            'themePref' => $this->themePref,
             'role' => $this->role ? $this->role->name : null,
             'permissions' => $this->role 
                 ? $this->role->permissions->pluck('name') 
                 : [],
+            'created_at' => $this->created_at?->format('Y-m-d H:i:s'),
         ];
     }
 }

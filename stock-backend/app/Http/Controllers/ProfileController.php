@@ -13,15 +13,27 @@ class ProfileController extends Controller
         $data = $request->validate([
             'name' => ['sometimes', 'string', 'max:255'],
             'email' => ['sometimes', 'email', 'unique:users,email,' . $user->id],
-            'phone' => ['sometimes', 'string', 'max:20']
         ]);
 
-        // We don't allow password or role update here
+
+        // Empêcher la modification du mot de passe et du rôle ici
         $user->update($data);
+
+        // Charger la relation correcte (role + permissions)
+        $user->load('role.permissions');
 
         return response()->json([
             'message' => 'Profile updated successfully',
-            'user' => $user->load('roles')
+            'user' => $user,
+        ]);
+    }
+
+    public function show(Request $request)
+    {
+        $user = $request->user()->load('role.permissions');
+
+        return response()->json([
+            'user' => $user
         ]);
     }
 }

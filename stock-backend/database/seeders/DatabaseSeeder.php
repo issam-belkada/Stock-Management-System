@@ -33,12 +33,12 @@ class DatabaseSeeder extends Seeder
     $adminRole->permissions()->sync($allPermissions);
 
     $managerPermissions = \App\Models\Permission::whereNotIn('name', [
-        'manage_users', 'view_users', 'manage_roles', 'manage_permissions'
+        'manage_users', 'view_users', 'manage_roles', 'manage_permissions','view_dashboard'
     ])->pluck('id')->toArray();
     $managerRole->permissions()->sync($managerPermissions);
 
     $cashierPermissions = \App\Models\Permission::whereIn('name', [
-        'view_products', 'make_sales', 'view_sales', 'view_notifications','view_categories','export_reports'
+        'view_products', 'make_sales', 'view_sales', 'view_notifications','view_categories'
     ])->pluck('id')->toArray();
     $cashierRole->permissions()->sync($cashierPermissions);
 }

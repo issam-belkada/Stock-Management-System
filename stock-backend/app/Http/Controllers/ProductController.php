@@ -14,7 +14,7 @@ class ProductController extends Controller
     use AuthorizesRequests, ValidatesRequests;
     public function index()
     {
-        $this->authorize('view_products');
+        
         return ProductResource::collection(Product::with('category', 'supplier')->paginate(10));
     }
 
@@ -27,20 +27,18 @@ class ProductController extends Controller
 
     public function show(Product $product)
     {
-        $this->authorize('view_products');
+
         return new ProductResource($product->load('category', 'supplier'));
     }
 
     public function update(ProductRequest $request, Product $product)
     {
-        $this->authorize('manage_products');
         $product->update($request->validated());
         return new ProductResource($product);
     }
 
     public function destroy(Product $product)
     {
-        $this->authorize('manage_products');
         $product->delete();
         return response()->json(['message' => 'Product deleted successfully']);
     }

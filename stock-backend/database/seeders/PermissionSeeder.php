@@ -16,6 +16,7 @@ class PermissionSeeder extends Seeder
     // Product & Inventory
     'create_product', 'edit_product', 'delete_product', 'view_products',
     'manage_categories', 'manage_suppliers', 'manage_stock',
+    'view_categories',
 
     // Sales & POS
     'make_sales', 'view_sales', 'cancel_sales', 'manage_pos',
@@ -26,7 +27,7 @@ class PermissionSeeder extends Seeder
     // Notifications
     'view_notifications', 'manage_notifications',
 
-    
+
     'view_dashboard',
 
 ];
