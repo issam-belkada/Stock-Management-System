@@ -46,16 +46,16 @@ Route::middleware('auth:sanctum')->group(function () {
         ->middleware('permission:view_products');
 
     Route::post('/products', [ProductController::class, 'store'])
-        ->middleware('permission:manage_products');
+        ->middleware('permission:create_product');
 
     Route::get('/products/{id}', [ProductController::class, 'show'])
         ->middleware('permission:view_products');
 
     Route::put('/products/{id}', [ProductController::class, 'update'])
-        ->middleware('permission:manage_products');
+        ->middleware('permission:edit_product');
 
     Route::delete('/products/{id}', [ProductController::class, 'destroy'])
-        ->middleware('permission:manage_products');
+        ->middleware('permission:delete_product');
 
 
 
@@ -77,7 +77,7 @@ Route::middleware('auth:sanctum')->group(function () {
     ->middleware('permission:manage_categories');
 
     Route::apiResource('suppliers', SupplierController::class)
-        ->middleware('permission:manage_suppliers');
+    ->middleware('permission:manage_suppliers');
 
     // Stock Movement
     Route::post('stock-in', [StockMovementController::class, 'stockIn'])

@@ -20,25 +20,27 @@ class ProductController extends Controller
 
     public function store(ProductRequest $request)
     {
-        $this->authorize('manage_products');
         $product = Product::create($request->validated());
         return new ProductResource($product);
     }
 
-    public function show(Product $product)
+    public function show($id)
     {
-
-        return new ProductResource($product->load('category', 'supplier'));
-    }
-
-    public function update(ProductRequest $request, Product $product)
-    {
-        $product->update($request->validated());
+        $product = Product::with('category', 'supplier')->findOrFail($id);
         return new ProductResource($product);
     }
 
-    public function destroy(Product $product)
+
+     public function update(ProductRequest $request, $id)
     {
+        $product = Product::findOrFail($id);
+        $product->update($request->validated());
+        return new ProductResource($product)->additional(['message' => 'Product updated successfully']);
+    }
+
+    public function destroy($id)
+    {
+        $product = Product::findOrFail($id);
         $product->delete();
         return response()->json(['message' => 'Product deleted successfully']);
     }

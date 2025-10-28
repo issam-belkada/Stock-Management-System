@@ -15,33 +15,32 @@ class SupplierController extends Controller
 
     public function index()
     {
-        $this->authorize('view_suppliers');
         return SupplierResource::collection(Supplier::latest()->paginate(10));
     }
 
     public function store(SupplierRequest $request)
     {
-        $this->authorize('manage_suppliers');
+
         $supplier = Supplier::create($request->validated());
+        return new SupplierResource($supplier)->additional(['message' => 'Supplier created successfully']);
+    }
+
+    public function show( $id)
+    {
+        $supplier = Supplier::findOrFail($id);
         return new SupplierResource($supplier);
     }
 
-    public function show(Supplier $supplier)
+    public function update(SupplierRequest $request, $id)
     {
-        $this->authorize('view_suppliers');
-        return new SupplierResource($supplier);
-    }
-
-    public function update(SupplierRequest $request, Supplier $supplier)
-    {
-        $this->authorize('manage_suppliers');
+        $supplier = Supplier::findOrFail($id);
         $supplier->update($request->validated());
         return new SupplierResource($supplier);
     }
 
-    public function destroy(Supplier $supplier)
+    public function destroy($id)
     {
-        $this->authorize('manage_suppliers');
+        $supplier = Supplier::findOrFail($id);
         $supplier->delete();
         return response()->json(['message' => 'Supplier deleted successfully']);
     }

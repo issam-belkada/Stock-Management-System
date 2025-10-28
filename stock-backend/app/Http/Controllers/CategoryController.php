@@ -15,33 +15,33 @@ class CategoryController extends Controller
 
     public function index()
     {
-        $this->authorize('view_categories');
-        return CategoryResource::collection(Category::latest()->paginate(10));
+        $categories = Category::with('products')->paginate(10);
+        return CategoryResource::collection($categories);
     }
+
 
     public function store(CategoryRequest $request)
     {
-        $this->authorize('manage_categories');
-        $category = Category::create($request->validated());
+        $category = Category::create(attributes: $request->validated());
+        return new CategoryResource($category)->additional(['message' => 'Category created successfully']);
+    }
+
+    public function show($id)
+    {
+        $category = Category::with('products')->findOrFail($id);
         return new CategoryResource($category);
     }
 
-    public function show(Category $category)
+    public function update(CategoryRequest $request, $id)
     {
-        $this->authorize('view_categories');
-        return new CategoryResource($category);
-    }
-
-    public function update(CategoryRequest $request, Category $category)
-    {
-        $this->authorize('manage_categories');
+        $category = Category::findOrFail($id);
         $category->update($request->validated());
-        return new CategoryResource($category);
+        return new CategoryResource($category)->additional(['message' => 'Category updated successfully']);
     }
 
-    public function destroy(Category $category)
+    public function destroy($id)
     {
-        $this->authorize('manage_categories');
+        $category = Category::findOrFail($id);
         $category->delete();
         return response()->json(['message' => 'Category deleted successfully']);
     }
