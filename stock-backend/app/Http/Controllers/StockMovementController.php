@@ -57,11 +57,12 @@ class StockMovementController extends Controller
         ]);
 
         // 🔔 Notify Admins & Managers if stock is low
-        if ($product->quantity <= 5 ) {
+        if ($product->stock <= 5 ) {
             Notification::create([
-                'type' => 'low_stock',
-                'message' => "Low stock alert: {$product->name} has {$product->quantity} items left.",
-                'for_roles' => json_encode(['Admin', 'Manager']),
+                'user_id' => auth::id(),
+                'title' => 'low_stock',
+                'message' => "{$product->name} has {$product->stock} items left.",
+                
             ]);
         }
 
