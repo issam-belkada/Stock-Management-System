@@ -16,7 +16,7 @@ class SupplierRequest extends FormRequest
                 'phone'   => 'required|string|max:20',
                 'address' => 'required|string|max:500',
         ];
-        } else {
+        } else if($this->isMethod('PUT') || $this->isMethod('PATCH')) {
             $rules = [
                 'name'   => 'sometimes|string|max:255',
                 'email'   => 'sometimes|email|max:255',

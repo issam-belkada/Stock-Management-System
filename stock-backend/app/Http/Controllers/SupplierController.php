@@ -35,7 +35,7 @@ class SupplierController extends Controller
     {
         $supplier = Supplier::findOrFail($id);
         $supplier->update($request->validated());
-        return new SupplierResource($supplier);
+        return new SupplierResource($supplier)->additional(['message' => 'Supplier updated successfully']);
     }
 
     public function destroy($id)
