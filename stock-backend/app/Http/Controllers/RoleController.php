@@ -23,7 +23,7 @@ class RoleController extends Controller
             'permissions' => 'array'
         ]);
 
-        $role = Role::create(['name' => $validated['name']]);
+        $role = Role::create(['name' => $validated['name'],'description'=>$validated['description'] ?? null]);
 
         if (!empty($validated['permissions'])) {
             $role->permissions()->sync($validated['permissions']);
@@ -46,11 +46,16 @@ class RoleController extends Controller
 
         $validated = $request->validate([
             'name' => 'sometimes|required|string|unique:roles,name,' . $role->id,
+            'description'=>'nullable|string',
             'permissions' => 'array'
         ]);
 
         if (isset($validated['name'])) {
             $role->update(['name' => $validated['name']]);
+        }
+
+        if (isset($validated['description'])) {
+            $role->update(['description' => $validated['description']]);
         }
 
         if (isset($validated['permissions'])) {

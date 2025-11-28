@@ -24,8 +24,8 @@ class ReportController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $totalIn = $movements->where('type', 'IN')->sum('quantity');
-        $totalOut = $movements->where('type', 'OUT')->sum('quantity');
+        $totalIn = $movements->where('type', 'in')->sum('quantity');
+        $totalOut = $movements->where('type', 'out')->sum('quantity');
 
         return response()->json([
             'period' => [
@@ -38,9 +38,8 @@ class ReportController extends Controller
         ]);
     }
 
-    /**
-     * 🏆 Top-selling products (based on stock OUT)
-     */
+    /**🏆 Top-selling products (based on stock OUT)*/
+    
     public function topProducts(Request $request)
     {
         $startDate = $request->query('start_date') 
@@ -69,9 +68,8 @@ class ReportController extends Controller
         ]);
     }
 
-    /**
-     * 📥 Optional: Export movements as CSV
-     */
+    /** Export movements as CSV */
+
     public function exportCSV(Request $request)
     {
         $startDate = $request->query('start_date') 
