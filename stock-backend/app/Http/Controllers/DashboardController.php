@@ -19,7 +19,7 @@ class DashboardController extends Controller
         $totalStockOut = StockMovement::where('type', 'OUT')->sum('quantity');
 
         // Low stock alerts
-        $lowStockProducts = Product::whereColumn('quantity', '<=', 'low_threshold')->get();
+        $lowStockProducts = Product::where('stock', '<=', 5)->get();
 
         // Recent stock movements (last 10)
         $recentMovements = StockMovement::with('product')

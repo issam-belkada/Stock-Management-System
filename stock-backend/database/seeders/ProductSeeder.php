@@ -12,7 +12,7 @@ class ProductSeeder extends Seeder
 
         Product::firstOrCreate([
             'name' => 'iPhone 14',
-            'sku' => 'SKU-0002',
+            'sku' => 'SKU-0001',
             'price' => '125000',
             'category_id' => 2
         ]);

@@ -7,6 +7,7 @@ use App\Models\StockMovement;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class StockMovementController extends Controller
 {
@@ -28,6 +29,8 @@ class StockMovementController extends Controller
             'user_id' => Auth::id(),
             'note'    => $request->note,
         ]);
+
+        
 
         return response()->json(['message' => 'Stock added successfully']);
     }
@@ -56,14 +59,18 @@ class StockMovementController extends Controller
             'note'    => $request->note,
         ]);
 
-        // 🔔 Notify Admins & Managers if stock is low
-        if ($product->stock <= 5 ) {
-            Notification::create([
-                'user_id' => auth::id(),
-                'title' => 'low_stock',
-                'message' => "{$product->name} has {$product->stock} items left.",
-                
-            ]);
+        // 🔔 NOTIFY ALL USERS IF STOCK IS LOW
+        if ($product->stock <= 5) {
+
+            $users = User::all(); // notify everyone
+
+            foreach ($users as $user) {
+                Notification::create([
+                    'user_id' => $user->id,
+                    'title'   => 'Low Stock Alert',
+                    'message' => "{$product->name} has only {$product->stock} items left.",
+                ]);
+            }
         }
 
         return response()->json(['message' => 'Stock deducted successfully']);

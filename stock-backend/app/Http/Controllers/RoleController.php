@@ -19,6 +19,7 @@ class RoleController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|unique:roles,name',
+            'description'=>'nullable|string',
             'permissions' => 'array'
         ]);
 
