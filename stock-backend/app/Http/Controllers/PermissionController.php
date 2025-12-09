@@ -25,9 +25,14 @@ class PermissionController extends Controller
     {
         $request->validate([
             'name' => 'required|string|unique:permissions,name',
+            'description' => 'nullable|string',
         ]);
 
         $permission = Permission::create(['name' => $request->name]);
+        if ($request->has('description')) {
+            $permission->description = $request->description;
+            $permission->save();
+        }
 
         return new PermissionResource($permission);
     }
