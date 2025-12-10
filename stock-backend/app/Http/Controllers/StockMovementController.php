@@ -49,7 +49,7 @@ class StockMovementController extends Controller
             return response()->json(['error' => 'Insufficient stock'], 400);
         }
 
-        $product->decrement('stock', $request->quantity);
+        
 
         StockMovement::create([
             'product_id' => $product->id,

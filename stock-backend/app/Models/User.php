@@ -26,11 +26,6 @@ class User extends Authenticatable
     }
 
 
-    public function notifications()
-    {
-        return $this->hasMany(Notification::class);
-    }
-
     public function hasPermission($permission)
     {
         return $this->role && $this->role->permissions->contains('name', $permission);

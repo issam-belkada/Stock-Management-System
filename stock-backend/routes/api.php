@@ -17,6 +17,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\SaleController;
+use App\Http\Controllers\InvoiceController;
 
 
 Route::post('login', [AuthController::class, 'login']);
@@ -117,12 +118,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('reports/stock', [ReportController::class, 'stockReport'])->middleware('permission:view_reports');
     Route::get('reports/top-products', [ReportController::class, 'topProducts'])->middleware('permission:view_reports');
     Route::get('reports/export', [ReportController::class, 'exportCSV'])->middleware('permission:export_reports');
-
+    Route::get('reports/export-pdf', [ReportController::class, 'exportPDF'])->middleware('permission:export_reports');
+    Route::get('reports/sales', [ReportController::class, 'salesReport'])->middleware('permission:view_reports');
 
 
 
     Route::post('sales', [SaleController::class, 'store'])->middleware('permission:make_sales');
-    Route::get('sales', [SaleController::class, 'index'])->middleware('permission:view_sales');
+    Route::get( 'sales', [SaleController::class, 'index'])->middleware('permission:view_sales');
     Route::get('sales/{id}', [SaleController::class, 'show'])->middleware('permission:view_sales');
+    Route::get('sales/{id}/invoice', [InvoiceController::class, 'download'])->middleware('permission:view_reports'); // télécharger facture
 
 });

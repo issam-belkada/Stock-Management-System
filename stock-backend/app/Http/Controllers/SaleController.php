@@ -2,73 +2,99 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\Sale;
 use App\Models\SaleItem;
 use App\Models\Product;
-use Illuminate\Http\Request;
+use App\Models\StockMovement;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
+use App\Models\Notification;
+use App\Models\User;
 
 class SaleController extends Controller
 {
-    public function index()
-    {
-        $sales = Sale::with('saleItems.product')->latest()->get();
-        return response()->json($sales);
-    }
-
-    public function show($id)
-    {
-        $sale = Sale::with('saleItems.product')->findOrFail($id);
-        return response()->json($sale);
-    }
-
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $data = $request->validate([
             'items' => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity' => 'required|numeric|min:1',
+            'items.*.quantity' => 'required|integer|min:1',
+            'items.*.price' => 'required|numeric|min:0',
         ]);
 
-        return DB::transaction(function () use ($validated) {
+        DB::beginTransaction();
+
+        try {
+            // compute total
             $total = 0;
-
-            // Create the sale
-            $sale = Sale::create([
-                'user_id' => auth()->id(),
-                'total_amount' => 0
-            ]);
-
-            foreach ($validated['items'] as $item) {
-                $product = Product::find($item['product_id']);
-
-                if ($product->stock < $item['quantity']) {
-                    throw new \Exception("Not enough stock for product: {$product->name}");
-                }
-
-                // Update stock
-                $product->stock -= $item['quantity'];
-                $product->save();
-
-                $subtotal = $product->price * $item['quantity'];
-                $total += $subtotal;
-
-                SaleItem::create([
-                    'sale_id' => $sale->id,
-                    'product_id' => $product->id,
-                    'quantity' => $item['quantity'],
-                    'price' => $product->price,
-                    'subtotal' => $subtotal
-                ]);
+            foreach ($data['items'] as $it) {
+                $total += $it['quantity'] * $it['price'];
             }
 
-            $sale->update(['total_amount' => $total]);
+            $sale = Sale::create([
+                'total_amount' => $total,
+                'user_id' => Auth::id() ?? null, // adapt if no auth
+            ]);
+
+            foreach ($data['items'] as $it) {
+                $product = Product::findOrFail($it['product_id']);
+
+                // check stock
+                if ($product->stock < $it['quantity']) {
+                    throw ValidationException::withMessages([
+                        'stock' => "Insufficient stock for product {$product->name}"
+                    ]);
+                }
+
+                // create sale item
+                $saleItem = $sale->saleItems()->create([
+                    'product_id' => $product->id,
+                    'quantity' => $it['quantity'],
+                    'price' => $it['price'],
+                    'subtotal' => $it['quantity'] * $it['price'],
+                ]);
+
+                // decrement product stock
+                $product->decrement('stock', $it['quantity']);
+
+                // create stock movement (OUT)
+                StockMovement::create([
+                    'product_id' => $product->id,
+                    'quantity' => $it['quantity'],
+                    'type' => 'OUT',
+                    'user_id' => Auth::id() ?? null,
+                    'note' => "Sale #{$sale->id}",
+                ]);
+
+                // 🔔 NOTIFY ALL USERS IF STOCK IS LOW
+                if ($product->stock <= 5) {
+        
+                    $users = User::all(); // notify everyone
+        
+                    foreach ($users as $user) {
+                        Notification::create([
+                            'user_id' => $user->id,
+                            'title'   => 'Low Stock Alert',
+                            'message' => "{$product->name} has only {$product->stock} items left.",
+                        ]);
+                    }
+                }
+
+            }
+
+            DB::commit();
 
             return response()->json([
-                'message' => 'Sale recorded successfully.',
-                'sale' => $sale->load('saleItems.product')
-            ]);
-        });
+                'message' => 'Sale created successfully',
+                'sale_id' => $sale->id,
+                'sale' => $sale->load('saleItems.product'),
+            ], 201);
+
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 }
